@@ -18,4 +18,32 @@ const char* ptr;
 char * const ptr;
 char const * ptr;
 
+## 区分
+   * C++ 没有 const* 运算符，所以 * 是修饰后面的内容
+   * const 是针对某个固定位置的写限制，const ptr; ptr内容是静态的
+   * C++ 标准规定，const放在类型或者变量名前面是等价的
+## 例子
+   const char * p; // *p 不可变, *p的类型是 char
+
+   const (char *) p;// p不可变，类型是 char *
+
+   char* const p; // p不可变，p的类型是 char *
+ 
+   const char* const p; // p不可变，p是 char * 类型, *p不可变
+ 
+   char const * p;// *p不可变，*p类型是char
+ 
+   (char*) const p;// p不可变，p的类型是char *
+ 
+   char* const p;// p不可变，p的类型是char *
+
+## 方法
+   * 判断变量钱是否有*号,例如2个*就把**p看成一个整体
+   * 然后剩余内容进行分组
+       * 如果char后面有*号则看成一个整体类型，他是对**p的类型声明
+       * 如果有const则**p整体是不可变的
+
+
+
+
 
