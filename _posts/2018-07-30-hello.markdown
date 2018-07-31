@@ -22,6 +22,7 @@ char const * ptr;
    * C++ 没有 const* 运算符，所以 * 是修饰后面的内容
    * const 是针对某个固定位置的写限制，const ptr; ptr内容是静态的
    * C++ 标准规定，const放在类型或者变量名前面是等价的
+   
 ## 例子
 
    const char * p; // *p 不可变, *p的类型是 char
