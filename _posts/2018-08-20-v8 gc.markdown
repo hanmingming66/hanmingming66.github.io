@@ -1,0 +1,66 @@
+---
+layout:     post
+title:      "V8 gc模型"
+subtitle:   "V8 的垃圾回收"
+date:       2018-08-20 20:36:00
+author:     "xiaohan"
+header-img: ""
+catalog: true
+tags:
+    - 学习
+---
+
+> “come on ”
+
+
+## V8 内存分配
+
+V8 的内存分配较少，32位是最大0.7G内存，64位最大分配1.4G内存，因为V8一开始的设计是给浏览器使用的，
+所以使用的内存不会太大
+
+V8 的内存分为新生代和老生代两部分，两个何在一起是全部内存，全部内存不能超过上面描述的上限
+
+```js
+node --max-new-space-size=1500 test.js  //设置新生代的最大限制
+node --max-old-space-size-2000 test.js  //设置老生代的最大限制
+```
+
+## 垃圾回收
+
+V8分为新生代和老生代两个部分，新生代采用scavenge算法进行内存回收，老生代使用mark-sweep& mark-commpact算法
+进行内存回收。
+
+### 新生代的回收
+
+新生代被分成两部分，from semispace和to semispace，每次都是from semispace的内存被使用
+V8 有个 "GC ROOT"是左右对象的根节点，如果一个对象不能通过GC ROOT遍历到，这个对象就被认为是不可达的，然后就会被标记，
+之后会被放在一个队列中进行回收。
+
+新生代进行gc时候，会先通过GC ROOT,查找不被使用的对象，进行标记，然后把没有被标记的对象从from semispace复制到
+to semispace, 之后被标记的对象会被放在一个队列中进行回收，这时候回from semispace的资源被释放完毕后，from semispace
+和to semispace两个空间进行交换。从而达到了内存回收。
+
+如果对象复制完成后to semispace的空间，达到25%，那么to semispace的对象则会直接晋升老生代；
+如果一个对象在多次复制后仍然没有被回收，他也会被晋升到老生代中
+
+### 老生代回收
+
+首先用mark-sweep算法，标记老生代的仍然存活的对象，然后会在清除阶段清除未被标记的对象，这时候老生代就会出现很多间断的碎片
+然后使用mark-compact算法，把标记的对象往一端移动，这时候内存就变成了连续的空间，省下的另一端则是被释放的空间
+
+
+mark-sweep对比mark-compact，后者比较慢，因为涉及到对象的移动，V8在清理的时候优先使用mark-sweep方式，在从新生代移动过来
+的对象不足以分配时候，才使用mark-compact对象进行对象移动
+
+
+
+## 什么时候触发gc
+
+当当前栈使用量大于栈的阈值时候会触发gc
+gc完成后，会把当前的堆栈使用量加上一个默认的阈值尺寸，作为下一次触发gc的阈值
+
+
+
+
+
+
